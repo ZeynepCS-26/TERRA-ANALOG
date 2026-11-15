@@ -784,9 +784,9 @@ export const DualMapPanel: React.FC<DualMapPanelProps> = ({ visible = true }) =>
     ) => {
       if (!map || !projInfo.supported) return;
 
-                const localUrl =
+                      const localUrl =
         site.body !== 'EARTH' && getLocalSurfaceImage(site.id)
-          ? `/fallback/${site.id}/surface.jpg`
+          ? `/assets/aistudio/fallback/${site.id}/surface.jpg`
           : null;
       if (localUrl) {
         const half = 12;
