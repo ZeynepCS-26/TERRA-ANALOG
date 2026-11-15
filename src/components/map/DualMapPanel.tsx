@@ -276,6 +276,7 @@ export const DualMapPanel: React.FC<DualMapPanelProps> = ({ visible = true }) =>
   const setCursorTelemetry = useWorkspaceStore((s) => s.setCursorTelemetry);
   const completeMapPick = useWorkspaceStore((s) => s.completeMapPick);
   const cancelMapPick = useWorkspaceStore((s) => s.cancelMapPick);
+  const enrichSiteById = useWorkspaceStore((s) => s.enrichSiteById);
 
   const target =
     sites.find((t) => t.id === activeTargetId) ?? sites.find((s) => s.body !== 'EARTH') ?? sites[0];
@@ -1149,35 +1150,16 @@ export const DualMapPanel: React.FC<DualMapPanelProps> = ({ visible = true }) =>
             {targetProj.label}
           </div>
 
-          {target.demStatus === 'unavailable' && (
-            <div className="pointer-events-none absolute top-[194px] lg:top-[140px] left-16 z-[450] rounded-lg bg-[#101217]/90 border border-[#C8553D]/40 px-3 py-1.5 font-mono text-[13px] text-[#E08A5B]">
-              Target DEM unavailable
-            </div>
-          )}
-          {targetStats?.deg.isDegenerate && (
-            <div className="pointer-events-none absolute top-[194px] lg:top-[140px] left-16 z-[450] rounded-lg bg-[#2A1414]/95 border border-[#C8553D]/50 px-3 py-1.5 font-mono text-[13px] text-[#E08A5B]">
-              DEM raster error: {targetStats.deg.reason}
-            </div>
-          )}
-          {!targetStats?.deg.isDegenerate && target.features?.slopeWarning && (
-            <div
-              data-testid="target-dem-quality-warning"
-              className="pointer-events-none absolute top-[194px] lg:top-[140px] left-16 z-[450] rounded-lg bg-[#2A1F14]/95 border border-[#D9A441]/50 px-3 py-1.5 font-mono text-[13px] text-[#D9A441]"
-            >
-              Check DEM quality (slope &gt; 45°)
-            </div>
-          )}
-          {!targetZoomCoverage && target.demGrid && (
-            <div className="pointer-events-none absolute top-[194px] lg:top-[140px] left-16 z-[450] rounded-lg bg-[#101217]/90 px-3 py-1.5 font-mono text-[13px] text-[#D9A441]">
-              No elevation data at this zoom
-            </div>
-          )}
-          {targetImageryError && (
-            <div
-              data-testid="target-imagery-error"
-              className="pointer-events-none absolute top-[232px] lg:top-[178px] left-16 z-[450] rounded-lg bg-[#2A1414]/92 border border-[#C8553D]/40 px-3 py-1.5 font-mono text-[13px] text-[#E08A5B]"
-            >
-              {targetImageryError}
+          {(target.demStatus === 'unavailable' || targetImageryError) && (
+            <div className="absolute inset-0 z-[490] bg-[#15181C] flex flex-col items-center justify-center p-6 text-center font-mono">
+              <p className="text-[15px] text-[#C7CEDB] mb-4">No surface data for this site</p>
+              <button
+                type="button"
+                onClick={() => void enrichSiteById(target.id)}
+                className="px-5 py-2 rounded-lg bg-[#2C313A] hover:bg-[#3E4450] text-white text-[13px] font-bold cursor-pointer transition-colors duration-150"
+              >
+                Retry
+              </button>
             </div>
           )}
 
@@ -1233,35 +1215,16 @@ export const DualMapPanel: React.FC<DualMapPanelProps> = ({ visible = true }) =>
             {analogProj.label}
           </div>
 
-          {analog.demStatus === 'unavailable' && (
-            <div className="pointer-events-none absolute top-14 lg:top-36 right-5 z-[450] rounded-lg bg-[#101217]/90 border border-[#C8553D]/40 px-3 py-1.5 font-mono text-[13px] text-[#E08A5B]">
-              Analog DEM unavailable
-            </div>
-          )}
-          {analogStats?.deg.isDegenerate && (
-            <div className="pointer-events-none absolute top-14 lg:top-36 right-5 z-[450] rounded-lg bg-[#2A1414]/95 border border-[#C8553D]/50 px-3 py-1.5 font-mono text-[13px] text-[#E08A5B]">
-              DEM raster error: {analogStats.deg.reason}
-            </div>
-          )}
-          {!analogStats?.deg.isDegenerate && analog.features?.slopeWarning && (
-            <div
-              data-testid="analog-dem-quality-warning"
-              className="pointer-events-none absolute top-14 lg:top-36 right-5 z-[450] rounded-lg bg-[#2A1F14]/95 border border-[#D9A441]/50 px-3 py-1.5 font-mono text-[13px] text-[#D9A441]"
-            >
-              Check DEM quality (slope &gt; 45°)
-            </div>
-          )}
-          {!analogZoomCoverage && analog.demGrid && (
-            <div className="pointer-events-none absolute top-14 lg:top-36 right-5 z-[450] rounded-lg bg-[#101217]/90 px-3 py-1.5 font-mono text-[13px] text-[#D9A441]">
-              No elevation data at this zoom
-            </div>
-          )}
-          {analogImageryError && (
-            <div
-              data-testid="analog-imagery-error"
-              className="pointer-events-none absolute top-24 lg:top-44 right-5 z-[450] rounded-lg bg-[#2A1414]/92 border border-[#C8553D]/40 px-3 py-1.5 font-mono text-[13px] text-[#E08A5B]"
-            >
-              {analogImageryError}
+          {(analog.demStatus === 'unavailable' || analogImageryError) && (
+            <div className="absolute inset-0 z-[490] bg-[#15181C] flex flex-col items-center justify-center p-6 text-center font-mono">
+              <p className="text-[15px] text-[#C7CEDB] mb-4">No surface data for this site</p>
+              <button
+                type="button"
+                onClick={() => void enrichSiteById(analog.id)}
+                className="px-5 py-2 rounded-lg bg-[#2C313A] hover:bg-[#3E4450] text-white text-[13px] font-bold cursor-pointer transition-colors duration-150"
+              >
+                Retry
+              </button>
             </div>
           )}
 
