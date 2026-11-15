@@ -38,13 +38,17 @@ const LOCAL_IMAGES = import.meta.glob('../../assets/images/*.{jpg,jpeg,png}', {
 
 function getLocalSurfaceImage(siteId: string): string | null {
   const id = siteId.toLowerCase();
-  const key = id.includes('jezero')
-    ? 'mars_jezero'
-    : id.includes('shackleton')
-      ? 'lunar_shackleton'
-      : null;
-  if (!key) return null;
-  const entry = Object.entries(LOCAL_IMAGES).find(([path]) => path.includes(key));
+  const map: Array<[string, string]> = [
+    ['jezero', 'mars_jezero'],
+    ['valles', 'mars_valles_marineris'],
+    ['orientale', 'orientale'],
+    ['shackleton', 'lunar_shackleton'],
+    ['tycho', 'lunar_tycho'],
+    ['taurus', 'lunar_taurus_littrow'],
+  ];
+  const hit = map.find(([needle]) => id.includes(needle));
+  if (!hit) return null;
+  const entry = Object.entries(LOCAL_IMAGES).find(([path]) => path.includes(hit[1]));
   return entry ? entry[1] : null;
 }
 const POLAR_ROI_HALF_KM = 10; // 20 x 20 km square ROI
