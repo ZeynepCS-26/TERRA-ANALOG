@@ -890,7 +890,7 @@ export const DualMapPanel: React.FC<DualMapPanelProps> = ({ visible = true }) =>
         return;
       }
 
-      if (hillshadeEnabled) {
+      if (hillshadeEnabled && !localUrl) {
         const hs = createBilinearDemLayer({
           site,
           mode: 'hillshade',
@@ -913,7 +913,7 @@ export const DualMapPanel: React.FC<DualMapPanelProps> = ({ visible = true }) =>
         }
       }
 
-      if (elevationOverlayEnabled) {
+      if (elevationOverlayEnabled && !localUrl) {
         const elev = createBilinearDemLayer({
           site,
           mode: 'elevation',
