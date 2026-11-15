@@ -784,8 +784,10 @@ export const DualMapPanel: React.FC<DualMapPanelProps> = ({ visible = true }) =>
     ) => {
       if (!map || !projInfo.supported) return;
 
-           const localUrl = site.body !== 'EARTH' ? getLocalSurfaceImage(site.id) : null;
-
+                const localUrl =
+        site.body !== 'EARTH' && getLocalSurfaceImage(site.id)
+          ? `/fallback/${site.id}/surface.jpg`
+          : null;
       if (localUrl) {
         const half = 12;
         const localBounds: L.LatLngBoundsExpression = projInfo.isPolar
@@ -800,7 +802,9 @@ export const DualMapPanel: React.FC<DualMapPanelProps> = ({ visible = true }) =>
                 [b.maxLat, b.maxLon],
               ] as L.LatLngBoundsExpression;
             })();
-        const localOverlay = L.imageOverlay(localUrl, localBounds, { opacity: 1.0 });
+                const localOverlay = L.imageOverlay(localUrl, localBounds, { opacity: 1.0 });
+        localOverlay.on('load', () => console.info('[TERRA-ANALOG IMG] loaded', localUrl));
+        localOverlay.on('error', () => console.error('[TERRA-ANALOG IMG] load failed', localUrl));
         localOverlay.addTo(map);
         storeList.push(localOverlay);
         console.info(`[TERRA-ANALOG IMG] site=${site.id} source=local file`);
