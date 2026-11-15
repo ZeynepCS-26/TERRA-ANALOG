@@ -110,10 +110,8 @@ function checkLoadedImageOverlay(img: HTMLImageElement | undefined): { valid: bo
   }
 }
 
-function getBodyToneClass(body: SiteRecord['body']): string {
-  if (body === 'MARS') return 'body-tone-mars';
-  if (body === 'MOON') return 'body-tone-moon';
-  return 'body-tone-earth';
+function getBodyToneClass(_body: SiteRecord['body']): string {
+  return 'bg-[#15181C]';
 }
 
 function clamp255(v: number): number {
@@ -796,21 +794,11 @@ export const DualMapPanel: React.FC<DualMapPanelProps> = ({ visible = true }) =>
         esri.addTo(map);
         storeList.push(esri);
       } else {
-        const backdropUrl =
-          site.body === 'MARS'
-            ? 'https://cartocdn-gusc.global.ssl.fastly.net/opmbuilder/api/v1/map/named/opm-mars-basemap-v0-2/all/{z}/{x}/{y}.png'
-            : 'https://cartocdn-gusc.global.ssl.fastly.net/opmbuilder/api/v1/map/named/opm-moon-basemap-v0-1/all/{z}/{x}/{y}.png';
-        const backdrop = L.tileLayer(backdropUrl, {
-          opacity: 1.0,
-          maxZoom: 16,
-          maxNativeZoom: 7,
-        });
-        backdrop.addTo(map);
-        storeList.push(backdrop);
-
         const wideBounds = getWideImageryBounds(site);
         const imgUrl = getImageryUrlForSite(site, wideBounds, projInfo);
-        const trekOverlay = L.imageOverlay(
+        const fallbackSurfaceUrl = `/fallback/${site.id}/surface.jpg`;
+
+        const primaryOverlay = L.imageOverlay(
           imgUrl,
           [
             [wideBounds.minLat, wideBounds.minLon],
@@ -818,16 +806,45 @@ export const DualMapPanel: React.FC<DualMapPanelProps> = ({ visible = true }) =>
           ],
           { opacity: 1.0, crossOrigin: 'anonymous' }
         );
-        trekOverlay.on('load', () => {
-          const check = checkLoadedImageOverlay(trekOverlay.getElement());
+        primaryOverlay.on('load', () => {
+          const check = checkLoadedImageOverlay(primaryOverlay.getElement());
           if (!check.valid) {
-            onImgErr(check.reason ?? 'Surface imagery unavailable');
-            map.removeLayer(trekOverlay);
+            map.removeLayer(primaryOverlay);
+            const fallbackOverlay = L.imageOverlay(
+              fallbackSurfaceUrl,
+              [
+                [wideBounds.minLat, wideBounds.minLon],
+                [wideBounds.maxLat, wideBounds.maxLon],
+              ],
+              { opacity: 1.0, crossOrigin: 'anonymous' }
+            );
+            fallbackOverlay.on('error', () => {
+              map.removeLayer(fallbackOverlay);
+              onImgErr('Surface imagery unavailable');
+            });
+            fallbackOverlay.addTo(map);
+            storeList.push(fallbackOverlay);
           }
         });
-        trekOverlay.on('error', () => onImgErr('Surface imagery unavailable'));
-        trekOverlay.addTo(map);
-        storeList.push(trekOverlay);
+        primaryOverlay.on('error', () => {
+          map.removeLayer(primaryOverlay);
+          const fallbackOverlay = L.imageOverlay(
+            fallbackSurfaceUrl,
+            [
+              [wideBounds.minLat, wideBounds.minLon],
+              [wideBounds.maxLat, wideBounds.maxLon],
+            ],
+            { opacity: 1.0, crossOrigin: 'anonymous' }
+          );
+          fallbackOverlay.on('error', () => {
+            map.removeLayer(fallbackOverlay);
+            onImgErr('Surface imagery unavailable');
+          });
+          fallbackOverlay.addTo(map);
+          storeList.push(fallbackOverlay);
+        });
+        primaryOverlay.addTo(map);
+        storeList.push(primaryOverlay);
       }
 
       if (!site.demGrid || !stats || stats.deg.isDegenerate) {
@@ -1184,6 +1201,18 @@ export const DualMapPanel: React.FC<DualMapPanelProps> = ({ visible = true }) =>
               <span>{scaleBar.label}</span>
             </div>
           </div>
+
+          {/* Target imagery source badge */}
+          <div
+            data-testid="target-imagery-source-badge"
+            className="pointer-events-none absolute bottom-3 left-4 z-[460] rounded-lg bg-[#101217]/84 border border-white/10 px-2.5 py-1 font-mono text-[11px] text-[#9AA3B2] shadow-md max-w-[270px] truncate"
+          >
+            {target.body === 'MARS'
+              ? 'Image: NASA/JPL-Caltech'
+              : target.body === 'MOON'
+                ? 'Image: NASA/GSFC/LROC'
+                : 'Image: Esri World Imagery'}
+          </div>
         </div>
 
         <div
@@ -1248,6 +1277,18 @@ export const DualMapPanel: React.FC<DualMapPanelProps> = ({ visible = true }) =>
             </div>
             <span className="text-white/25">·</span>
             <span>{syncViews ? 'Linked' : 'Unlocked'}</span>
+          </div>
+
+          {/* Analog imagery source badge */}
+          <div
+            data-testid="analog-imagery-source-badge"
+            className="pointer-events-none absolute bottom-3 left-4 z-[460] rounded-lg bg-[#101217]/84 border border-white/10 px-2.5 py-1 font-mono text-[11px] text-[#9AA3B2] shadow-md max-w-[270px] truncate"
+          >
+            {analog.body === 'MARS'
+              ? 'Image: NASA/JPL-Caltech'
+              : analog.body === 'MOON'
+                ? 'Image: NASA/GSFC/LROC'
+                : 'Image: Esri World Imagery'}
           </div>
         </div>
 
