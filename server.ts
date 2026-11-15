@@ -102,15 +102,14 @@ function parseAndValidateMeterBbox(raw: string): [number, number, number, number
   return [xmin, ymin, xmax, ymax];
 }
 
-async function startServer() {
-  const app = express();
-  app.disable('x-powered-by');
-  app.use((_req, res, next) => {
-    res.setHeader('X-Content-Type-Options', 'nosniff');
-    res.setHeader('Referrer-Policy', 'strict-origin-when-cross-origin');
-    next();
-  });
-  app.use(express.json({ limit: '16mb' }));
+const app = express();
+app.disable('x-powered-by');
+app.use((_req, res, next) => {
+  res.setHeader('X-Content-Type-Options', 'nosniff');
+  res.setHeader('Referrer-Policy', 'strict-origin-when-cross-origin');
+  next();
+});
+app.use(express.json({ limit: '16mb' }));
 
   app.get('/api/health', (_req, res) => {
     res.json({
@@ -768,12 +767,13 @@ async function startServer() {
   });
 
   if (!isProduction) {
-    const { createServer: createViteServer } = await import('vite');
-    const vite = await createViteServer({
-      server: { middlewareMode: true },
-      appType: 'spa',
+    import('vite').then(async ({ createServer: createViteServer }) => {
+      const vite = await createViteServer({
+        server: { middlewareMode: true },
+        appType: 'spa',
+      });
+      app.use(vite.middlewares);
     });
-    app.use(vite.middlewares);
   } else {
     const distDir = path.resolve(__dirname, 'dist');
     app.use(express.static(distDir));
@@ -787,12 +787,10 @@ async function startServer() {
     });
   }
 
-  app.listen(PORT, '0.0.0.0', () => {
-    console.log(`TERRA-ANALOG server listening on http://0.0.0.0:${PORT}`);
-  });
-}
+  if (!process.env.VERCEL) {
+    app.listen(PORT, '0.0.0.0', () => {
+      console.log(`TERRA-ANALOG server listening on http://0.0.0.0:${PORT}`);
+    });
+  }
 
-startServer().catch((err) => {
-  console.error('Failed to start TERRA-ANALOG server:', err);
-  process.exit(1);
-});
+export default app;
