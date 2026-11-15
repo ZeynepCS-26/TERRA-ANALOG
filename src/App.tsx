@@ -603,7 +603,11 @@ export default function App() {
             title="Click to inspect full 7-parameter breakdown"
             className={`pointer-events-auto inline-flex items-center gap-2 px-3.5 py-1 rounded-full ${floatSurface} border border-white/10 text-[13px] text-[#C7CEDB] hover:text-white hover:border-white/25 cursor-pointer shadow-md max-w-[min(560px,calc(100vw-32px))] truncate transition-colors duration-150`}
           >
-            <span className="truncate">{matchDrivers.line}</span>
+            <span className="truncate">
+              {match?.specStatus === 'INSUFFICIENT-DATA' || match?.scorePct === null || match?.scorePct === undefined
+                ? `Terrain comparison unavailable: ${target?.body || 'Planetary'} DEM not loaded`
+                : matchDrivers.line}
+            </span>
           </button>
         )}
 
