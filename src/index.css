@@ -1,0 +1,197 @@
+@import "tailwindcss";
+
+@theme {
+  --font-display: "Plus Jakarta Sans", ui-sans-serif, system-ui, sans-serif;
+  --font-sans: "Plus Jakarta Sans", ui-sans-serif, system-ui, sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+}
+
+@layer base {
+  html,
+  body {
+    background-color: #0b0d10;
+    color: #f2f4f8;
+    font-family: var(--font-sans);
+    font-size: 14px;
+    line-height: 1.5;
+    margin: 0;
+    padding: 0;
+    overflow-x: hidden;
+  }
+
+  * {
+    scrollbar-width: thin;
+    scrollbar-color: rgba(255, 255, 255, 0.18) transparent;
+  }
+}
+
+/* Neutral precision range slider */
+input[type="range"].sci-slider {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 100%;
+  height: 3px;
+  background: rgba(255, 255, 255, 0.16);
+  outline: none;
+  border-radius: 9999px;
+  cursor: pointer;
+}
+
+input[type="range"].sci-slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 14px;
+  height: 14px;
+  background: #f2f4f8;
+  border: 2px solid #0b0d10;
+  border-radius: 9999px;
+  cursor: pointer;
+  transition: transform 150ms cubic-bezier(0.16, 1, 0.3, 1), background-color 150ms ease;
+}
+
+input[type="range"].sci-slider::-webkit-slider-thumb:hover {
+  transform: scale(1.15);
+  background: #ffffff;
+}
+
+input[type="range"].sci-slider::-moz-range-thumb {
+  width: 14px;
+  height: 14px;
+  background: #f2f4f8;
+  border: 2px solid #0b0d10;
+  border-radius: 9999px;
+  cursor: pointer;
+}
+
+/* Leaflet map surface (#181B20 dark charcoal matching panel background, zero pure-black void) */
+.leaflet-container {
+  background: #181b20 !important;
+  font-family: var(--font-mono) !important;
+  font-size: 13px !important;
+  cursor: crosshair !important;
+}
+
+/* Brightness/contrast equalization across planetary and terrestrial imagery without altering vector overlays */
+.body-tone-mars .leaflet-tile-pane,
+.body-tone-mars .leaflet-image-layer {
+  filter: brightness(1.24) contrast(1.15) saturate(0.94);
+}
+
+.body-tone-moon .leaflet-tile-pane,
+.body-tone-moon .leaflet-image-layer {
+  filter: brightness(1.08) contrast(1.12);
+}
+
+.body-tone-earth .leaflet-tile-pane,
+.body-tone-earth .leaflet-image-layer {
+  filter: brightness(0.92) contrast(0.97) saturate(0.92);
+}
+
+.leaflet-control-attribution {
+  display: none !important;
+}
+
+.leaflet-tooltip.sci-map-tooltip {
+  background: rgba(16, 18, 23, 0.94);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 6px;
+  color: #f2f4f8;
+  font-family: var(--font-sans);
+  font-size: 13px !important;
+  line-height: 1.45;
+  padding: 6px 10px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5);
+}
+
+@keyframes panelReveal {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes drawerLeft {
+  from {
+    opacity: 0;
+    transform: translateX(28px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes bubbleExpandCover {
+  0% {
+    transform: translate(-50%, -50%) scale(0.015);
+    opacity: 0.72;
+  }
+  70% {
+    opacity: 0.96;
+  }
+  100% {
+    transform: translate(-50%, -50%) scale(1);
+    opacity: 1;
+  }
+}
+
+@keyframes bubbleShrinkExit {
+  0% {
+    transform: translate(-50%, -50%) scale(1);
+    opacity: 0.92;
+  }
+  100% {
+    transform: translate(-50%, -50%) scale(0.015);
+    opacity: 0;
+  }
+}
+
+@keyframes workspaceRevealFade {
+  0% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+  }
+}
+
+.no-scrollbar {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
+@media print {
+  @page {
+    margin: 14mm;
+    size: A4 portrait;
+  }
+
+  body {
+    background: #ffffff !important;
+    color: #0f172a !important;
+  }
+
+  .no-print {
+    display: none !important;
+  }
+
+  .print-dossier-sheet {
+    position: static !important;
+    width: 100% !important;
+    max-width: none !important;
+    max-height: none !important;
+    overflow: visible !important;
+    border: 1px solid #0f172a !important;
+    background: #ffffff !important;
+    color: #0f172a !important;
+    box-shadow: none !important;
+  }
+}

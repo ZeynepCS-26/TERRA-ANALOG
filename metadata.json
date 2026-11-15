@@ -1,0 +1,8 @@
+{
+  "name": "TERRA-ANALOG // Planetary Site Identification & GIS Matching System",
+  "description": "Planetary site identification, topographic harmonization, and Earth analog GIS matching console.",
+  "requestFramePermissions": [],
+  "majorCapabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
+}
