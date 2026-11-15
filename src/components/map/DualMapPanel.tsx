@@ -31,7 +31,22 @@ import { ElevationProfileChart } from '../charts/ElevationProfileChart';
 interface DualMapPanelProps {
   visible?: boolean;
 }
+const LOCAL_IMAGES = import.meta.glob('../../assets/images/*.{jpg,jpeg,png}', {
+  eager: true,
+  as: 'url',
+}) as Record<string, string>;
 
+function getLocalSurfaceImage(siteId: string): string | null {
+  const id = siteId.toLowerCase();
+  const key = id.includes('jezero')
+    ? 'mars_jezero'
+    : id.includes('shackleton')
+      ? 'lunar_shackleton'
+      : null;
+  if (!key) return null;
+  const entry = Object.entries(LOCAL_IMAGES).find(([path]) => path.includes(key));
+  return entry ? entry[1] : null;
+}
 const POLAR_ROI_HALF_KM = 10; // 20 x 20 km square ROI
 const POLAR_WIDE_HALF_KM = 50; // 100 x 100 km backdrop imagery
 
@@ -765,7 +780,27 @@ export const DualMapPanel: React.FC<DualMapPanelProps> = ({ visible = true }) =>
     ) => {
       if (!map || !projInfo.supported) return;
 
-      if (projInfo.isPolar) {
+           const localUrl = site.body !== 'EARTH' ? getLocalSurfaceImage(site.id) : null;
+
+      if (localUrl) {
+        const half = 12;
+        const localBounds: L.LatLngBoundsExpression = projInfo.isPolar
+          ? [
+              [-half, -half],
+              [half, half],
+            ]
+          : (() => {
+              const b = computeBoundsFromCenter(site.lat, site.lon, half, site.body).bounds;
+              return [
+                [b.minLat, b.minLon],
+                [b.maxLat, b.maxLon],
+              ] as L.LatLngBoundsExpression;
+            })();
+        const localOverlay = L.imageOverlay(localUrl, localBounds, { opacity: 1.0 });
+        localOverlay.addTo(map);
+        storeList.push(localOverlay);
+        console.info(`[TERRA-ANALOG IMG] site=${site.id} source=local file`);
+      } else if (projInfo.isPolar) {
         const imgUrl = getImageryUrlForSite(site, site.bounds, projInfo);
         const polarImg = L.imageOverlay(
           imgUrl,
