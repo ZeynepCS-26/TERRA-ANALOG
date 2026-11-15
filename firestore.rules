@@ -1,0 +1,58 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    function isValidId(id) {
+      return id is string && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\-]+$');
+    }
+    function isSignedIn() {
+      return request.auth != null;
+    }
+    function isVerifiedUser() {
+      return isSignedIn() && request.auth.token.email_verified == true;
+    }
+    function incoming() {
+      return request.resource.data;
+    }
+    function existing() {
+      return resource.data;
+    }
+
+    function isValidSite(data) {
+      return data.keys().hasAll(['id', 'name', 'body', 'lat', 'lon', 'radiusKm']) &&
+             data.keys().hasOnly(['id', 'name', 'body', 'lat', 'lon', 'radiusKm', 'ingestMethod', 'country', 'isoCode', 'notes', 'createdAtIso', 'updatedAtIso', 'missionProgram', 'summary', 'demStatus', 'demError', 'features', 'climate', 'geology', 'geminiEstimate', 'crewOverrides', 'ownerId']) &&
+             data.id is string && data.id.size() <= 128 &&
+             data.name is string && data.name.size() <= 200 &&
+             data.body is string && data.body in ['MARS', 'MOON', 'EARTH'] &&
+             data.lat is number && data.lon is number && data.radiusKm is number &&
+             (!('notes' in data) || (data.notes is string && data.notes.size() <= 5000));
+    }
+
+    function isValidUserProfile(data) {
+      return data.keys().hasAll(['uid', 'email', 'role']) &&
+             data.keys().hasOnly(['uid', 'email', 'displayName', 'role', 'updatedAt']) &&
+             data.uid is string && data.uid.size() <= 128 &&
+             data.email is string && data.email.size() <= 256 &&
+             data.role is string && data.role in ['researcher', 'admin', 'viewer'];
+    }
+
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    match /sites/{siteId} {
+      allow read: if true;
+      allow create: if isVerifiedUser() && isValidId(siteId) && isValidSite(incoming());
+      allow update: if isVerifiedUser() && isValidId(siteId) && isValidSite(incoming()) && (
+        incoming().id == existing().id
+      );
+      allow delete: if isVerifiedUser() && isValidId(siteId);
+    }
+
+    match /users/{userId} {
+      allow read: if isVerifiedUser();
+      allow create: if isVerifiedUser() && isValidId(userId) && request.auth.uid == userId && isValidUserProfile(incoming()) && incoming().role == 'researcher';
+      allow update: if isVerifiedUser() && isValidId(userId) && request.auth.uid == userId && isValidUserProfile(incoming()) && incoming().role == existing().role;
+      allow delete: if isVerifiedUser() && request.auth.uid == userId;
+    }
+  }
+}

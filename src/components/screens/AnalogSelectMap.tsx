@@ -218,18 +218,8 @@ export const AnalogSelectMap: React.FC<AnalogSelectMapProps> = ({
     initialFocusAppliedRef.current = true;
     setSelectedId(pt.analogId);
     setFocusedId(pt.analogId);
-    const targetScale = 2.35;
-    const padTop = Math.max(132, viewport.h * 0.16);
-    const padBottom = Math.max(92, viewport.h * 0.12);
-    const targetCenterX = viewport.w * 0.5;
-    const targetCenterY = viewport.h * 0.52;
-    const rawTx = targetCenterX - pt.x * targetScale;
-    const rawTy = targetCenterY - pt.y * targetScale;
-    const maxTy = padTop * (1 - targetScale);
-    const minTy = (viewport.h - padBottom) * (1 - targetScale);
-    const ty = Math.max(minTy, Math.min(maxTy, rawTy));
-    setZoom({ scale: targetScale, tx: rawTx, ty });
-  }, [zoomToInitial, initialSelectedId, points, viewport.w, viewport.h]);
+    // Keep map unzoomed on page load as requested
+  }, [zoomToInitial, initialSelectedId, points]);
 
   const selectedPoint = useMemo(
     () => points.find((p) => p.analogId === selectedId) ?? null,

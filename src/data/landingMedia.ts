@@ -22,14 +22,6 @@ export const LANDING_HOLD_DURATION_MS = 5500;
 
 export const LANDING_MEDIA_SLIDES: LandingSlideAsset[] = [
   {
-    id: 'jezero-delta',
-    nasaId: 'PIA26252',
-    title: 'Jezero Crater Delta, Mars',
-    body: 'MARS',
-    imageUrl: 'https://images-assets.nasa.gov/image/PIA26252/PIA26252~medium.jpg',
-    fallbackKind: 'mars_jezero',
-  },
-  {
     id: 'lunar-south-pole',
     nasaId: 'PIA13523',
     title: 'Shackleton Region, Lunar South Pole',

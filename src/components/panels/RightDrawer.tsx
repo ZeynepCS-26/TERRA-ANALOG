@@ -15,6 +15,79 @@ import { formatCoordLabel, formatSiteFullName, formatSpecStatus } from '../../li
 import { evaluateSiteSimilarity, similarityScoreToColor } from '../../lib/similarity/similarityEngine';
 import { useWorkspaceStore } from '../../store/useWorkspaceStore';
 import { CountryFlag } from '../ui/CountryFlag';
+import { auth, logoutUser, signInWithGoogle } from '../../lib/firebase/firebase';
+import { onAuthStateChanged, type User } from 'firebase/auth';
+
+const FirebaseAccountSection: React.FC = () => {
+  const [user, setUser] = useState<User | null>(auth.currentUser);
+  const [loading, setLoading] = useState(false);
+
+  React.useEffect(() => {
+    const unsub = onAuthStateChanged(auth, (u) => setUser(u));
+    return () => unsub();
+  }, []);
+
+  const handleLogin = async () => {
+    setLoading(true);
+    try {
+      await signInWithGoogle();
+    } catch {
+      // handled
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleLogout = async () => {
+    setLoading(true);
+    try {
+      await logoutUser();
+    } catch {
+      // handled
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  if (user) {
+    return (
+      <div className="rounded-lg bg-[#161920] p-3 space-y-2 text-[13px]">
+        <div className="flex items-center justify-between">
+          <span className="font-bold text-[#F2F4F8] truncate">{user.displayName || user.email}</span>
+          <span className="inline-flex items-center gap-1.5 text-[#8FA886]">
+            <span className="w-2 h-2 rounded-full bg-[#8FA886]" />
+            Authenticated
+          </span>
+        </div>
+        <div className="text-[#9AA3B2] truncate text-xs">{user.email}</div>
+        <button
+          type="button"
+          onClick={() => void handleLogout()}
+          disabled={loading}
+          className="w-full mt-1 py-1.5 rounded bg-white/10 hover:bg-white/18 text-[#F2F4F8] font-medium cursor-pointer"
+        >
+          Sign out
+        </button>
+      </div>
+    );
+  }
+
+  return (
+    <div className="rounded-lg bg-[#161920] p-3 space-y-2 text-[13px]">
+      <div className="text-[#9AA3B2] leading-snug">
+        Sign in with Google to sync field notes and custom sites securely to Firestore.
+      </div>
+      <button
+        type="button"
+        onClick={() => void handleLogin()}
+        disabled={loading}
+        className="w-full py-2 rounded-lg bg-[#F2F4F8] hover:bg-white text-[#0B0D10] font-bold cursor-pointer transition-colors"
+      >
+        {loading ? 'Signing in…' : 'Sign in with Google'}
+      </button>
+    </div>
+  );
+};
 
 export const RightDrawer: React.FC = () => {
   const rightDrawer = useWorkspaceStore((s) => s.rightDrawer);
@@ -848,6 +921,13 @@ export const RightDrawer: React.FC = () => {
 
         {rightDrawer === 'info' && (
           <>
+            <div className="space-y-2.5">
+              <div className="text-[14px] font-bold text-[#F2F4F8]">Firebase Account &amp; Sync</div>
+              <FirebaseAccountSection />
+            </div>
+
+            <div className="h-px bg-white/8" />
+
             <div className="space-y-2.5">
               <div className="text-[14px] font-bold text-[#F2F4F8]">Team sharing (JSON)</div>
               <div className="grid grid-cols-2 gap-2">

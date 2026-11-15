@@ -1,0 +1,47 @@
+{
+  "entities": {
+    "Site": {
+      "title": "SiteRecord",
+      "description": "Planetary target or Earth analog site record",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "maxLength": 128 },
+        "name": { "type": "string", "maxLength": 200 },
+        "body": { "type": "string", "enum": ["MARS", "MOON", "EARTH"] },
+        "lat": { "type": "number" },
+        "lon": { "type": "number" },
+        "radiusKm": { "type": "number" },
+        "ingestMethod": { "type": "string" },
+        "country": { "type": "string" },
+        "isoCode": { "type": "string" },
+        "notes": { "type": "string", "maxLength": 5000 },
+        "createdAtIso": { "type": "string" },
+        "updatedAtIso": { "type": "string" }
+      },
+      "required": ["id", "name", "body", "lat", "lon", "radiusKm"]
+    },
+    "UserProfile": {
+      "title": "UserProfile",
+      "description": "User account profile and role",
+      "type": "object",
+      "properties": {
+        "uid": { "type": "string", "maxLength": 128 },
+        "email": { "type": "string", "format": "email", "maxLength": 256 },
+        "displayName": { "type": "string", "maxLength": 120 },
+        "role": { "type": "string", "enum": ["researcher", "admin", "viewer"] },
+        "updatedAt": { "type": "string" }
+      },
+      "required": ["uid", "email", "role"]
+    }
+  },
+  "firestore": {
+    "/sites/{siteId}": {
+      "schema": { "$ref": "Site" },
+      "description": "Public and custom shared planetary & analog sites"
+    },
+    "/users/{userId}": {
+      "schema": { "$ref": "UserProfile" },
+      "description": "User profile records"
+    }
+  }
+}
