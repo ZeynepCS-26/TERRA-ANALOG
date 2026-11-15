@@ -393,20 +393,27 @@ export default function App() {
           data-testid={compact ? 'hero-similarity-score-mobile' : 'hero-similarity-score'}
           className="shrink-0 flex items-center gap-2.5 pl-3 border-l border-white/12 cursor-pointer transition-opacity duration-150 hover:opacity-85 text-left"
         >
-          <span
-            className={`font-mono font-bold leading-none tabular-nums ${
-              match?.scorePct !== null && match?.scorePct !== undefined
-                ? 'text-[26px] xl:text-[32px]'
-                : 'text-[15px] xl:text-[17px]'
-            }`}
-            style={{ color: scoreColor }}
-          >
-            {match?.scorePct !== null && match?.scorePct !== undefined
-              ? `${animatedScore.toFixed(1)}%`
-              : match?.specStatus === 'INSUFFICIENT-DATA'
-                ? 'Insufficient data'
-                : 'N/A'}
-          </span>
+          <div className="flex flex-col">
+            <span
+              className={`font-mono font-bold leading-none tabular-nums ${
+                match?.scorePct !== null && match?.scorePct !== undefined
+                  ? 'text-[26px] xl:text-[32px]'
+                  : 'text-[15px] xl:text-[17px]'
+              }`}
+              style={{ color: scoreColor }}
+            >
+              {match?.scorePct !== null && match?.scorePct !== undefined
+                ? `${animatedScore.toFixed(1)}%`
+                : match?.specStatus === 'INSUFFICIENT-DATA'
+                  ? 'Insufficient data'
+                  : 'N/A'}
+            </span>
+            {target?.demGrid?.source?.includes('Synthetic') && (
+              <span className="text-[11px] font-mono text-[#D9A441] leading-tight mt-1">
+                {target.body === 'MARS' ? 'Mars side modeled' : 'Moon side modeled'}
+              </span>
+            )}
+          </div>
 
           <span className="hidden sm:flex flex-col leading-tight">
             <span

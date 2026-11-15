@@ -245,7 +245,8 @@ export async function fetchPlanetaryTrekDem(
       bounds: metricBounds,
       resolutionMPerPx: Math.max(1, Math.round(20000 / gridSize)),
     };
-  } catch {
+  } catch (err) {
+    console.error(`[NASA Trek DEM fetch failed for ${body}]`, err);
     return generateSyntheticPlanetaryDem(body, centerLat, centerLon, gridSize, metricBounds);
   }
 }

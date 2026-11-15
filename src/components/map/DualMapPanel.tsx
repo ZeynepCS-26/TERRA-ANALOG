@@ -1150,6 +1150,12 @@ export const DualMapPanel: React.FC<DualMapPanelProps> = ({ visible = true }) =>
             {targetProj.label}
           </div>
 
+          {target.demGrid?.source?.includes('Synthetic') && (
+            <div className="pointer-events-none absolute top-[194px] lg:top-[140px] left-4 z-[460] rounded-lg bg-[#2A1F14]/95 border border-[#D9A441]/50 px-2.5 py-1 font-mono text-[12px] text-[#D9A441] shadow-md">
+              Modeled data, not measured
+            </div>
+          )}
+
           {(target.demStatus === 'unavailable' || targetImageryError) && (
             <div className="absolute inset-0 z-[490] bg-[#15181C] flex flex-col items-center justify-center p-6 text-center font-mono">
               <p className="text-[15px] text-[#C7CEDB] mb-4">No surface data for this site</p>
